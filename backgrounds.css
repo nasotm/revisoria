@@ -1,0 +1,36 @@
+body.qm-background-enabled { isolation: isolate; background-image: none; }
+#qm-background { position: fixed; inset: 0; overflow: hidden; z-index: -1; pointer-events: none; background: var(--bg); }
+.qm-bg-picture, .qm-bg-veil, .qm-bg-preview-image, .qm-bg-preview-veil { position: absolute; inset: -24px; background-size: cover; background-repeat: no-repeat; }
+.qm-bg-veil, .qm-bg-preview-veil { background: #020817; }
+[data-theme="light"] .qm-bg-veil, [data-theme="light"] .qm-bg-preview-veil { background: #f8fafc; }
+.qm-background-enabled .welcome-screen { background: transparent; }
+.qm-background-enabled .welcome-content { padding: 40px; border: 1px solid var(--line); border-radius: 28px; background: var(--side-bg); backdrop-filter: blur(18px); }
+.qm-background-enabled .main-header { background: var(--side-bg); backdrop-filter: blur(14px); }
+.qm-background-enabled .card { box-shadow: 0 12px 40px #0002; }
+#qm-background-button { position: fixed; bottom: 20px; right: 140px; z-index: 1100; width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--line); background: var(--side-bg); color: var(--text); backdrop-filter: blur(14px); cursor: pointer; font-size: 1.3rem; box-shadow: 0 5px 20px #0003; }
+#qm-background-button:focus-visible, #qm-background-dialog button:focus-visible, #qm-background-dialog input:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+#qm-background-dialog { width: min(600px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); padding: 26px; border: 1px solid var(--line); border-radius: 24px; background: var(--bg); color: var(--text); overflow: auto; box-shadow: 0 24px 100px #0007; }
+#qm-background-dialog::backdrop { background: #02081777; backdrop-filter: blur(4px); }
+.qm-bg-heading { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between; }
+.qm-bg-eyebrow { color: var(--muted); font-size: .65rem; letter-spacing: .15em; }
+#qm-background-title { font-size: 1.5rem; line-height: 1.2; margin: 8px 0 0; }
+#qm-background-dialog h3 { font-size: .95rem; margin: 22px 0 12px; }
+.qm-bg-preview { position: relative; overflow: hidden; height: 140px; border: 1px solid var(--line); border-radius: 16px; display: grid; place-items: center; }
+.qm-bg-preview span { position: relative; color: white; text-shadow: 0 2px 10px #000; font-size: 1.1rem; font-weight: 600; padding: 12px 20px; border-radius: 14px; background: #02081750; }
+.qm-bg-presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.qm-bg-presets button { border: 2px solid transparent; border-radius: 12px; background: transparent; color: var(--muted); padding: 4px; cursor: pointer; font: inherit; font-size: .75rem; }
+.qm-bg-presets button[aria-pressed="true"] { border-color: var(--primary); color: var(--text); }
+.qm-bg-presets i { display: block; height: 48px; border-radius: 7px; margin-bottom: 7px; }
+.qm-bg-upload, .qm-bg-footer { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.qm-bg-upload .btn { font-size: .8rem; padding: 10px 12px; }
+.qm-bg-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.qm-bg-upload:focus-within label { outline: 2px solid var(--primary); }
+.qm-bg-controls { display: grid; gap: 16px; margin-top: 22px; }
+.qm-bg-control span { display: flex; justify-content: space-between; font-size: .85rem; gap: 10px; }
+.qm-bg-control output { color: var(--muted); font-variant-numeric: tabular-nums; }
+.qm-bg-control input { width: 100%; accent-color: var(--primary); margin: 10px 0 0; }
+#qm-background-dialog button:disabled, .qm-bg-control input:disabled { opacity: .4; cursor: default; }
+.qm-bg-status { min-height: 2.5em; font-size: .8rem; color: var(--muted); margin: 20px 0 10px; }
+.qm-bg-footer { justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--line); }
+@media (max-width: 480px) { #qm-background-dialog { padding: 18px; } .qm-bg-presets { gap: 3px; } .qm-bg-preview { height: 110px; } #qm-background-title { font-size: 1.25rem; } }
+@media print { #qm-background, #qm-background-button, #qm-background-dialog { display: none !important; } }
