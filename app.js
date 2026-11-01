@@ -1,12 +1,26 @@
-// ⚠️ METS TA CLÉ API ICI (https://aistudio.google.com/apikey)
-//    const GEMINI_API_KEY = '';
-// Ne laisse jamais une vraie clé dans un fichier que tu publies : tout le code
-// de cette page est visible par n'importe quel visiteur.
-const GEMINI_API_KEY = '';
+// Clé API Gemini : saisie par chaque utilisateur (bouton 🔑 Clé IA), stockée dans son navigateur.
+// Ne jamais écrire de clé dans ce fichier : tout le code est visible par les visiteurs.
+// La clé n'est PAS dans le code : chaque utilisateur la saisit dans l'app, elle reste dans son navigateur.
+const GEMINI_KEY_STORAGE = 'quizmaster_gemini_key';
+const getGeminiKey = () => { try { return (localStorage.getItem(GEMINI_KEY_STORAGE) || '').trim(); } catch (_) { return ''; } };
+const hasGeminiKey = () => getGeminiKey() !== '';
+// Demande la clé une fois (ou la modifie). Renvoie true si une clé est enregistrée.
+function askGeminiKey(current = '') {
+  const typed = prompt("Colle ta clé API Gemini (https://aistudio.google.com/apikey). Elle reste uniquement dans ce navigateur.\n\nLaisse vide pour supprimer la clé.", current);
+  if (typed === null) return hasGeminiKey();
+  try {
+    if (typed.trim()) localStorage.setItem(GEMINI_KEY_STORAGE, typed.trim());
+    else localStorage.removeItem(GEMINI_KEY_STORAGE);
+  } catch (_) {}
+  return hasGeminiKey();
+}
+// À utiliser avant chaque appel IA : demande la clé si elle manque.
+const ensureGeminiKey = () => hasGeminiKey() || askGeminiKey();
+window.openGeminiKeySettings = () => { askGeminiKey(getGeminiKey()); render(); };
 // Modèle utilisé. `gemini-2.0-flash` a été ARRÊTÉ par Google le 1er juin 2026
 // (tous les appels renvoyaient une erreur 404 « model not found »).
 const GEMINI_MODEL = 'gemini-3.8-flash';
-const GEMINI_ENDPOINT = () => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_ENDPOINT = () => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(getGeminiKey())}`;
 const escapeHtml = (s) => String(s ?? '')
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
   .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -48,14 +62,12 @@ function sanitizeMemoHtml(html) {
 }
 
 // 🔧 FIX : la clé "placeholder" était comparée en dur à 6 endroits différents.
-const GEMINI_KEY_PLACEHOLDER = 'VOTRE_CLE_ICI';
-const hasGeminiKey = () => GEMINI_API_KEY.trim() !== '' && GEMINI_API_KEY !== GEMINI_KEY_PLACEHOLDER;
 
 // 🔧 FIX : un seul point d'appel pour l'API. Avant, chaque appel faisait
 // `if (!data.candidates?.[0]...) throw "Réponse IA invalide"` et masquait le vrai
 // message d'erreur (clé refusée, quota, modèle inexistant...).
 async function callGemini(parts) {
-  if (!hasGeminiKey()) throw new Error("Aucune clé API Gemini configurée : renseigne GEMINI_API_KEY en haut du fichier.");
+  if (!ensureGeminiKey()) throw new Error("Aucune clé API Gemini : ajoute-la via le bouton 🔑 Clé IA.");
   const res = await fetch(GEMINI_ENDPOINT(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -670,7 +682,7 @@ window.readExplanation = () => {
 
 // 🔧 FIX 16: endpoint centralisé + guard réponse + escapeHtml
 window.explainWithAI = async (btn) => {
-  if (!hasGeminiKey()) return alert("Mets ta clé API Gemini dans le code (const GEMINI_API_KEY, en haut du script).");
+  if (!ensureGeminiKey()) return;
   const q = state.questions[state.index];
   const a = state.answers[state.index];
   const originalText = btn.innerHTML;
@@ -995,7 +1007,7 @@ window.startMemorizeFromResource = async (resId, type, url, pageTitle) => {
 
 // 🔧 FIX 4: summarizeResource et generateQuizFromResource séparées (accolades corrigées)
 window.summarizeResource = async (resId, type) => {
-  if (!hasGeminiKey()) return alert("Mets ta clé API Gemini dans le code (const GEMINI_API_KEY, en haut du script).");
+  if (!ensureGeminiKey()) return;
   showPromptModal("Résumé en cours...", "L'IA analyse ton document...", () => {});
   const modal = document.getElementById('custom-modal');
   if (modal) modal.innerHTML = `<div class="custom-modal-card"><h3>⏳ Analyse du cours en cours...</h3><p class="muted">L'IA lit ton document et prépare un résumé...</p></div>`;
@@ -1036,7 +1048,7 @@ window.summarizeResource = async (resId, type) => {
 };
 
 window.generateQuizFromResource = async (resId, type, url, pageId) => {
-  if (!hasGeminiKey()) return alert("⚠️ Tu dois d'abord mettre ta clé API Gemini dans le code (const GEMINI_API_KEY) pour utiliser cette fonctionnalité.");
+  if (!ensureGeminiKey()) return;
   const btn = document.getElementById(`btn-gen-${resId}`);
   if (!btn) return;
   const originalText = btn.innerHTML;
@@ -1091,7 +1103,7 @@ window.generateQuizFromResource = async (resId, type, url, pageId) => {
   }
 };
 window.showBulkGenerateModal = (pageId) => {
-  if (!hasGeminiKey()) return alert("Mets ta clé API Gemini dans le code (const GEMINI_API_KEY, en haut du script).");
+  if (!ensureGeminiKey()) return;
   const modalHTML = `
     <div class="custom-modal-overlay" id="bulk-modal">
       <div class="custom-modal-card" style="max-width: 600px;">
@@ -1777,6 +1789,8 @@ function renderNotebooks() {
       <span>COULEUR D'ACCENT</span>
     </div>
     <div class="accent-row">${accentSwatchesHTML()}</div>
+    <div class="nb-list-title"><span>CLÉ IA (GEMINI)</span></div>
+    <div class="row" style="padding: 0 15px 15px 15px;"><button class="btn ghost" onclick="openGeminiKeySettings()">🔑 ${hasGeminiKey() ? 'Modifier ma clé' : 'Ajouter ma clé'}</button></div>
     <div class="nb-list-title">
       <span>MES MATIÈRES</span>
       <button class="btn-icon" onclick="addNotebook()" title="Ajouter une matière">➕</button>
@@ -3865,7 +3879,7 @@ document.addEventListener('change', async (e) => {
 
   if(e.target.id === 'filePdf') {
     const file = e.target.files[0]; if(!file) return;
-    if(!hasGeminiKey()) return alert("Mets ta clé API dans le code !");
+    if(!ensureGeminiKey()) return;
     if (!isPdfReady()) return alert("PDF.js non chargé (vérifie ta connexion).");
     const btn = document.getElementById('btn-ia'); btn.textContent="⏳ Analyse..."; btn.disabled=true;
     try {
@@ -3889,7 +3903,7 @@ document.addEventListener('change', async (e) => {
 
 // 🔧 FIX 20: avertissement clé API
 if (!hasGeminiKey()) {
-  console.warn('%c⚠️ Révisoria : clé Gemini non configurée. Les fonctions IA ne marcheront pas.', 'color: orange; font-weight: bold;');
+  console.info('Clé Gemini non configurée : elle sera demandée au premier usage d’une fonction IA.');
 }
 
 // LANCEMENT
